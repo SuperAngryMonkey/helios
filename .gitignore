@@ -1,0 +1,27 @@
+# venv dirs (when helios.py is installed under /opt/helios/)
+bin/
+lib/
+lib64/
+include/
+share/
+pyvenv.cfg
+
+# Python
+__pycache__/
+*.pyc
+*.pyo
+.pytest_cache/
+
+# Secrets — never commit real env files
+*.env
+config/*.env
+!config/*.env.example
+
+# Editor
+.vscode/
+.idea/
+*.swp
+.DS_Store
+
+# Misc
+*.log

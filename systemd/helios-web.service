@@ -1,0 +1,33 @@
+[Unit]
+Description=Helios — web dashboard
+Documentation=https://github.com/SuperAngryMonkey/helios
+After=helios.service postgresql.service network-online.target
+Wants=helios.service
+Requires=postgresql.service
+
+[Service]
+Type=simple
+User=helios
+Group=helios
+WorkingDirectory=/opt/helios/web
+ExecStart=/opt/helios/bin/gunicorn --workers 2 --bind 0.0.0.0:5000 --access-logfile - --error-logfile - app:app
+Restart=on-failure
+RestartSec=10
+StandardOutput=journal
+StandardError=journal
+SyslogIdentifier=helios-web
+
+NoNewPrivileges=true
+PrivateTmp=true
+ProtectSystem=strict
+ProtectHome=true
+ReadWritePaths=/opt/helios
+PrivateDevices=true
+ProtectKernelTunables=true
+ProtectKernelModules=true
+ProtectControlGroups=true
+RestrictAddressFamilies=AF_INET AF_INET6 AF_UNIX
+LockPersonality=true
+
+[Install]
+WantedBy=multi-user.target
