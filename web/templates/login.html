@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>helios · login</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="{{ url_for('static', filename='css/monkey.css') }}">
+<style>
+  body { display: flex; align-items: center; justify-content: center; min-height: 100vh; max-width: 100%; padding: 0; }
+  .login-box { background: var(--c2); border: var(--border); padding: 32px; width: 360px; }
+  .login-logo { font-family: var(--fdisplay); font-size: 56px; letter-spacing: 6px; color: var(--acc); margin-bottom: 4px; line-height: 1; }
+  .login-sub { font-size: 10px; color: var(--txt2); letter-spacing: 3px; text-transform: uppercase; margin-bottom: 28px; }
+  .field { margin-bottom: 16px; }
+  .field-label { font-size: 9px; color: var(--txt2); letter-spacing: 2px; text-transform: uppercase; margin-bottom: 6px; }
+  .field input { width: 100%; background: var(--c3); border: var(--border); color: var(--txt); font-family: var(--fmono); font-size: 13px; padding: 10px 14px; outline: none; transition: border-color 0.2s; }
+  .field input:focus { border-color: var(--acc); }
+  .submit { width: 100%; background: transparent; border: 1px solid var(--acc); color: var(--acc); font-family: var(--fmono); font-size: 10px; padding: 12px; cursor: pointer; letter-spacing: 3px; text-transform: uppercase; transition: background 0.2s; margin-top: 8px; }
+  .submit:hover { background: rgba(0, 212, 255, 0.1); }
+  .error { color: var(--danger); font-size: 10px; margin-top: 14px; text-align: center; letter-spacing: 1px; }
+  .epigraph { font-style: italic; text-align: center; margin-top: 24px; color: var(--txt3); font-size: 10px; letter-spacing: 4px; }
+</style>
+</head>
+<body>
+<div class="login-box">
+  <div class="login-logo">HELIOS</div>
+  <div class="login-sub">authentication required</div>
+  <form method="POST">
+    <div class="field">
+      <div class="field-label">Username</div>
+      <input type="text" name="username" autocomplete="username" autofocus required>
+    </div>
+    <div class="field">
+      <div class="field-label">Password</div>
+      <input type="password" name="password" autocomplete="current-password" required>
+    </div>
+    <button type="submit" class="submit">Authenticate</button>
+    {% if error %}<div class="error">{{ error }}</div>{% endif %}
+  </form>
+  <div class="epigraph">POST TENEBRAS LUX</div>
+</div>
+</body>
+</html>

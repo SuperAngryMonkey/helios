@@ -7,6 +7,41 @@ Versioning: [SemVer](https://semver.org/spec/v2.0.0.html)
 
 ## [Unreleased]
 
+## [0.2.0] — 2026-06-05
+
+### Added
+
+- **Authentication** via Flask-Login. All routes (HTML and JSON API)
+  require login. Single-user system; bcrypt-hashed password and Flask
+  secret key stored in `/etc/helios/admin.env`.
+- **Login page** at `/login` — Monkey-themed, centered card.
+- **Admin page** at `/admin` — form to edit `CTRL_HOST`, `CTRL_PORT`,
+  `CTRL_DEVICE_ID`, and the three poll cadences. Atomically rewrites
+  `/etc/helios/controller.env` and restarts the helios daemon on save.
+- **`passwd.py` CLI helper** — generates the bcrypt hash, writes
+  `/etc/helios/admin.env`. Run as `sudo /opt/helios/bin/python /opt/helios/passwd.py`.
+- **Sudoers grant** in `helios.sudoers` — narrow privileges for daemon
+  restart and config install. No shell, no other privileges.
+- **Nav links** on the dashboard header: Admin · Logout.
+- **ADR-0004** documenting the auth + admin pattern.
+
+### Changed
+
+- `web/app.py` rewritten to add Flask-Login wiring, `@login_required`
+  decorators on every route, and the admin form handler with input
+  validation.
+- `web/templates/index.html` gains Admin and Logout links in the header.
+- `requirements.txt` adds `Flask-Login` and `bcrypt`.
+
+### Security
+
+- Session cookies: `HttpOnly`, `SameSite=Lax`, signed with
+  `HELIOS_SECRET_KEY`.
+- Session lifetime: 12 hours.
+- Bcrypt cost factor: 12.
+- Sudoers grant is two specific commands — no wildcard expansion that
+  could be exploited.
+
 ## [0.1.0] — 2026-06-04
 
 Initial public release.

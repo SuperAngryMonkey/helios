@@ -1,15 +1,19 @@
 # helios — handoff
 
-Current state as of 2026-06-04.
+Current state as of 2026-06-05 (v0.2.0).
 
 ## What's working
 
 - **Daemon** (`helios.service`) polling every 30 s and writing to Postgres.
-  Verified telemetry rows landing at correct cadence; daily, lifetime, and
-  events tables all populating.
-- **Web** (`helios-web.service`) on port 5000 via gunicorn (2 workers).
-  Monkey-themed dashboard renders 4 metric tiles, 2 timeseries, an
-  aggregate `.fg` strip, and the *POST TENEBRAS LUX* epigraph.
+- **Web** (`helios-web.service`) on port 5000 via gunicorn (2 workers),
+  Monkey-themed dashboard with 4 metric tiles, 2 timeseries, aggregate strip.
+- **Authentication** (v0.2.0): Flask-Login session auth, single admin user,
+  bcrypt hash in `/etc/helios/admin.env`. All routes (HTML + JSON API)
+  require login. Login page at `/login`, logout at `/logout`.
+- **Admin page** (v0.2.0): `/admin` form for editing controller IP, port,
+  device ID, and poll cadences. Saves atomically rewrite
+  `/etc/helios/controller.env` and restart the daemon via a narrow sudoers
+  grant.
 - **Postgres** local on the LXC, schema applied, indices on `(ts DESC)`.
 - **Gateway**: EarthCam EC-SS501 ("TerminalSrv v3.600MU" firmware) at
   10.200.200.201:4660 in TCP-server mode. Slave 255 (Renogy broadcast).
@@ -31,40 +35,46 @@ Current state as of 2026-06-04.
 - [ ] **Grafana**: installed but disabled — left in place for potential
       reuse on Heimdall. To fully uninstall:
       `apt purge grafana && rm -rf /etc/grafana /var/lib/grafana`.
-- [ ] **Grafana 13 provisioning bug**: legacy YAML failed silently with
-      misleading "data source not found". Move-aside-and-add-via-UI worked
-      around it. If revisited, try disabling the `provisioning` feature flag.
 - [ ] **Dev-mode hook in `web/app.py`**: the `if __name__ == '__main__'`
-      block calls `app.run(host="0.0.0.0", port=5000, debug=True)`. Used
-      during smoke test; gunicorn ignores it in production but leaving it
-      in is a footgun if anyone runs `python app.py` directly. Consider
-      removing.
-- [ ] **First-cycle fault event**: every daemon restart inserts a
-      "fault cleared" event row because `last_fault` starts at `-1`. Could
-      skip the initial insert when transitioning `-1 → 0`.
+      block calls `app.run(debug=True)`. Gunicorn ignores it; harmless but
+      a footgun if anyone runs `python app.py` directly.
+- [ ] **First-cycle "fault cleared" event** on daemon restart: cosmetic
+      but writes a noisy `events` row on every restart because
+      `last_fault` starts at `-1`.
+- [ ] **Threshold-based color on metric tiles**: SOC and Battery V tiles
+      are hard-coded `green` in the template. Should turn orange/red
+      based on the value. JS-side class toggling.
+- [ ] **Bigger PV panel install** (hardware): rewire load + serial
+      adapter after panel swap. Watch charge current ≤ 0.3C of AGM bank.
 
 ## Watch list
 
-- **Wanderer Modbus stability**: if reads stop returning, probe with
-  `device_id=1` and `device_id=255` to confirm slave address.
+- **Wanderer Modbus stability**: if reads stop, probe with `device_id=1`
+  and `device_id=255` to confirm slave address.
 - **Gateway buffer flushing**: inter-character time gap is set to 50 ms.
   If Modbus frames start fragmenting, raise to 100 ms in the gateway UI.
-- **Time drift**: LXC clock is critical for the `daily` table primary key.
-  Confirm `timedatectl` reports NTP-synchronized.
+- **Time drift**: LXC clock is critical for `daily` table key. Confirm
+  `timedatectl` reports NTP-synchronized.
+- **`/var/lib/helios/controller.env.new`**: present briefly during admin
+  saves, then `install`'d into place. Should never persist between saves.
 
 ## Next features (priority order)
 
-1. **`/faults` page** — table of recent fault events, decoded bitfield names.
+1. **`/faults` page** — table of recent fault events, decoded bitfield
+   names from the `events` table.
 2. **`/history` page** — 30-day trend of generated vs consumed Wh, daily
    battery V min/max sparkline.
-3. **Alerting** — simple threshold checker (`battery_v < 11.5`, fault
+3. **Threshold-based colors** — see Open items above.
+4. **Alerting** — simple threshold checker (`battery_v < 11.5`, fault
    word non-zero) firing a webhook (Slack, iMessage relay).
-4. **Multi-controller support** — when the airboat install or a Lauderdale
-   solar setup is wired, helios becomes a multi-tenant collector. Add
-   `controller_id` to schema, support multiple
-   `/etc/helios/controllers/*.env` files.
+5. **API token mechanism** — for external consumers to hit the JSON API
+   without sharing a session cookie. ADR-0005 reserved.
+6. **Multi-controller support** — when the airboat install or a
+   Lauderdale solar setup is wired. Add `controller_id` to schema,
+   support multiple `/etc/helios/controllers/*.env` files.
 
 ## Provenance
 
-Built 2026-06-04 in a single Cyrano session. Bootstrap from nothing to
-working dashboard in ~3 hours, including a Grafana detour we backed out of.
+- v0.1.0 (2026-06-04): bootstrap from nothing to working dashboard,
+  ~3 hours including a Grafana detour we backed out of.
+- v0.2.0 (2026-06-05): authentication + admin page, ~45 minutes.

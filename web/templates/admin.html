@@ -1,0 +1,50 @@
+{% extends "base.html" %}
+{% block title %}helios · admin{% endblock %}
+{% block content %}
+<div class="hdr">
+  <div class="hdr-left">
+    <div class="logo">HELIOS</div>
+    <div class="subtitle">administration</div>
+  </div>
+  <div class="hdr-right">
+    <a href="{{ url_for('index') }}" style="color: var(--txt2); font-size: 10px; letter-spacing: 2px; text-transform: uppercase; text-decoration: none;">← Dashboard</a>
+    <a href="{{ url_for('logout') }}" style="color: var(--txt2); font-size: 10px; letter-spacing: 2px; text-transform: uppercase; text-decoration: none;">Logout</a>
+  </div>
+</div>
+
+<div class="panel">
+  <div class="panel-hdr">
+    <div class="panel-title">Controller Configuration</div>
+    <div class="panel-badge live">{{ current_user.username }}</div>
+  </div>
+
+  {% if success %}
+    <div style="color: var(--acc3); padding: 10px 0; font-size: 11px; letter-spacing: 1px; border-bottom: var(--border-subtle); margin-bottom: 12px;">✓ {{ success }}</div>
+  {% endif %}
+  {% if error %}
+    <div style="color: var(--danger); padding: 10px 0; font-size: 11px; letter-spacing: 1px; border-bottom: var(--border-subtle); margin-bottom: 12px;">✗ {{ error }}</div>
+  {% endif %}
+
+  <form method="POST" style="margin-top: 12px;">
+    {% for key, label, _ in fields %}
+    <div style="margin-bottom: 16px;">
+      <div style="font-size: 9px; color: var(--txt2); letter-spacing: 2px; text-transform: uppercase; margin-bottom: 6px;">{{ label }}</div>
+      <input type="text" name="{{ key }}" value="{{ values.get(key, '') }}" class="cmd-input" style="width: 100%;" required>
+      <div style="font-size: 9px; color: var(--txt3); margin-top: 4px; font-family: var(--fmono);">{{ key }}</div>
+    </div>
+    {% endfor %}
+    <button type="submit" class="cmd-btn">Save &amp; Restart Daemon</button>
+  </form>
+</div>
+
+<div class="fg">
+  <div class="panel-hdr"><div class="panel-title">Notes</div></div>
+  <div style="font-size: 11px; color: var(--txt2); line-height: 1.6; padding-top: 6px;">
+    Saving rewrites <span style="color: var(--acc);">/etc/helios/controller.env</span> and restarts the
+    <span style="color: var(--acc);">helios.service</span> daemon. The dashboard will continue serving stale
+    data for a few seconds during restart; new poll cycles use the updated settings immediately.
+  </div>
+</div>
+
+<div class="epigraph">POST TENEBRAS LUX</div>
+{% endblock %}

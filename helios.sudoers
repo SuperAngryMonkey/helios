@@ -1,0 +1,10 @@
+# /etc/sudoers.d/helios
+# Narrow grants for the helios admin UI:
+#   1. Restart the helios poll daemon after config changes
+#   2. Atomically install a new controller.env from the helios-owned staging path
+#
+# Install with:   sudo install -m 440 -o root -g root helios.sudoers /etc/sudoers.d/helios
+# Validate with:  sudo visudo -c -f /etc/sudoers.d/helios
+
+helios ALL=(root) NOPASSWD: /bin/systemctl restart helios
+helios ALL=(root) NOPASSWD: /usr/bin/install -m 640 -o root -g helios /var/lib/helios/controller.env.new /etc/helios/controller.env

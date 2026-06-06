@@ -7,6 +7,8 @@
     <div class="subtitle">Renogy Wanderer 30A · Lab Solar Telemetry</div>
   </div>
   <div class="hdr-right">
+    <a href="{{ url_for('admin') }}" style="color: var(--txt2); font-size: 10px; letter-spacing: 2px; text-transform: uppercase; text-decoration: none;">Admin</a>
+    <a href="{{ url_for('logout') }}" style="color: var(--txt2); font-size: 10px; letter-spacing: 2px; text-transform: uppercase; text-decoration: none;">Logout</a>
     <div class="status-dot" id="status-dot"></div>
     <div class="status-txt" id="status-txt">CONNECTING</div>
     <div class="clock" id="clock">--:--:--</div>
@@ -14,12 +16,12 @@
 </div>
 
 <div class="metrics">
-  <div class="metric green">
+  <div class="metric green" id="m-soc">
     <div class="metric-label">Battery SOC</div>
     <div class="metric-val"><span id="soc">--</span><span style="font-size:18px; color:var(--txt2);"> %</span></div>
     <div class="metric-sub">state of charge</div>
   </div>
-  <div class="metric green">
+  <div class="metric green" id="m-bv">
     <div class="metric-label">Battery</div>
     <div class="metric-val"><span id="batt-v">--</span><span style="font-size:18px; color:var(--txt2);"> V</span></div>
     <div class="metric-sub"><span id="batt-temp">--</span> °C · charge <span id="charge-i">--</span> A</div>
