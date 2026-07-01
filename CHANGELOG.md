@@ -7,6 +7,37 @@ Versioning: [SemVer](https://semver.org/spec/v2.0.0.html)
 
 ## [Unreleased]
 
+## [0.3.0] — 2026-06-19
+
+### Added — six new dashboard charts
+
+- **Battery SOC (24h)** — green line, 0–100 %.
+- **Charge current (24h)** — cyan line, amps.
+- **Temperatures (24h)** — two lines, controller (cyan) + battery
+  (green, from the AGM temp probe).
+- **Charge state (24h)** — color-coded 5-min buckets showing which
+  state the controller was in. Legend below explains the palette.
+- **7-day energy** — grouped bar chart, generated vs consumed Wh.
+  The net-positive/net-negative story at a glance.
+- **Faults (30d)** — sparse scatter timeline of fault events; latest
+  5 listed textually below with timestamp + decoded description.
+  Badge switches CLEAR / N EVENTS.
+
+### Changed
+
+- `/api/timeseries` now returns `charge_i`, `battery_temp_c`,
+  `controller_temp_c`, and `charge_state` alongside the existing four
+  fields. Uses `mode() WITHIN GROUP` for charge state aggregation.
+- `charts.js` refactored to share a `baseTimeOpts()` factory and a
+  `line()` helper across the new charts.
+- Layout: single-column existing charts joined by two rows of
+  side-by-side panels (grid2), keeping the page balanced.
+
+### Docs
+
+- ADR-0005 captures the chart selection, aggregation rationale, and
+  the color palette for charge states.
+
 ## [0.2.1] — 2026-06-19
 
 ### Changed — admin save architecture (breaking for anyone on 0.2.0)

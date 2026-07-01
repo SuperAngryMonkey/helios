@@ -46,12 +46,72 @@
   <div style="height: 240px; position: relative;"><canvas id="chart-power"></canvas></div>
 </div>
 
+<div class="grid2">
+  <div class="panel">
+    <div class="panel-hdr">
+      <div class="panel-title">Battery Voltage — Last 24 Hours</div>
+      <div class="panel-badge live">LIVE</div>
+    </div>
+    <div style="height: 200px; position: relative;"><canvas id="chart-battery"></canvas></div>
+  </div>
+  <div class="panel">
+    <div class="panel-hdr">
+      <div class="panel-title">Battery SOC — Last 24 Hours</div>
+      <div class="panel-badge live">LIVE</div>
+    </div>
+    <div style="height: 200px; position: relative;"><canvas id="chart-soc"></canvas></div>
+  </div>
+</div>
+
+<div class="grid2">
+  <div class="panel">
+    <div class="panel-hdr">
+      <div class="panel-title">Charge Current — Last 24 Hours</div>
+      <div class="panel-badge live">LIVE</div>
+    </div>
+    <div style="height: 200px; position: relative;"><canvas id="chart-charge-i"></canvas></div>
+  </div>
+  <div class="panel">
+    <div class="panel-hdr">
+      <div class="panel-title">Temperatures — Last 24 Hours</div>
+      <div class="panel-badge live">LIVE</div>
+    </div>
+    <div style="height: 200px; position: relative;"><canvas id="chart-temp"></canvas></div>
+  </div>
+</div>
+
 <div class="panel">
   <div class="panel-hdr">
-    <div class="panel-title">Battery Voltage — Last 24 Hours</div>
+    <div class="panel-title">Charge State — Last 24 Hours</div>
     <div class="panel-badge live">LIVE</div>
   </div>
-  <div style="height: 200px; position: relative;"><canvas id="chart-battery"></canvas></div>
+  <div style="height: 130px; position: relative;"><canvas id="chart-state"></canvas></div>
+  <div style="display: flex; gap: 16px; margin-top: 12px; flex-wrap: wrap; font-size: 9px; color: var(--txt2); letter-spacing: 1px; text-transform: uppercase;">
+    <span><span style="display:inline-block; width:10px; height:10px; background:var(--txt3); vertical-align:middle; margin-right:4px;"></span>deactivated</span>
+    <span><span style="display:inline-block; width:10px; height:10px; background:var(--acc2); vertical-align:middle; margin-right:4px;"></span>activated</span>
+    <span><span style="display:inline-block; width:10px; height:10px; background:var(--acc3); vertical-align:middle; margin-right:4px;"></span>mppt</span>
+    <span><span style="display:inline-block; width:10px; height:10px; background:var(--acc); vertical-align:middle; margin-right:4px;"></span>equalizing</span>
+    <span><span style="display:inline-block; width:10px; height:10px; background:var(--acc); vertical-align:middle; margin-right:4px;"></span>boost</span>
+    <span><span style="display:inline-block; width:10px; height:10px; background:#00cc66; vertical-align:middle; margin-right:4px;"></span>floating</span>
+    <span><span style="display:inline-block; width:10px; height:10px; background:var(--danger); vertical-align:middle; margin-right:4px;"></span>current_limit</span>
+  </div>
+</div>
+
+<div class="panel">
+  <div class="panel-hdr">
+    <div class="panel-title">Energy — Last 7 Days</div>
+    <div class="panel-badge live">DAILY</div>
+  </div>
+  <div style="height: 240px; position: relative;"><canvas id="chart-energy"></canvas></div>
+</div>
+
+<div class="panel">
+  <div class="panel-hdr">
+    <div class="panel-title">Faults — Last 30 Days</div>
+    <div class="panel-badge live" id="fault-badge">MONITORING</div>
+  </div>
+  <div style="height: 100px; position: relative;"><canvas id="chart-faults"></canvas></div>
+  <div id="fault-list" style="margin-top: 12px; font-size: 11px; color: var(--txt2); line-height: 1.6;"></div>
 </div>
 
 <div class="fg">

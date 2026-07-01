@@ -1,6 +1,6 @@
 # helios — handoff
 
-Current state as of 2026-06-19 (v0.2.1).
+Current state as of 2026-06-19 (v0.3.0).
 
 ## What's working
 
@@ -19,6 +19,15 @@ Current state as of 2026-06-19 (v0.2.1).
 - **StarTech NETRS2321P** (v0.2.1): second serial gateway on the lab
   at 10.200.200.10:4001. Selectable via the /admin form on the fly.
 - **Postgres** local on the LXC, schema applied, indices on `(ts DESC)`.
+- **Dashboard charts** (v0.3.0): 8 charts total:
+  - Power flows 24h (line, PV + Load)
+  - Battery voltage 24h (line)
+  - Battery SOC 24h (line)
+  - Charge current 24h (line)
+  - Temperatures 24h (2 lines: controller + battery)
+  - Charge state 24h (color-coded 5-min buckets)
+  - 7-day energy (grouped bar, gen vs used)
+  - Faults 30d (sparse scatter + latest-5 list)
 - **Gateway (current)**: pick whichever is powered up —
   - **EarthCam EC-SS501** ("TerminalSrv v3.600MU") at
     `10.200.200.201:4660`, TCP-server mode, silent time 50 ms.

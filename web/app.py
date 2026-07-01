@@ -142,10 +142,14 @@ def api_timeseries():
         cur.execute("""
             SELECT
                 to_timestamp(floor(extract(epoch FROM ts) / %s) * %s) AS bucket,
-                avg(pv_w)::int AS pv_w,
+                avg(pv_w)::int   AS pv_w,
                 avg(load_w)::int AS load_w,
                 avg(battery_v)::numeric(4,2) AS battery_v,
-                avg(battery_soc)::int AS battery_soc
+                avg(battery_soc)::int        AS battery_soc,
+                avg(charge_i)::numeric(5,2)  AS charge_i,
+                avg(battery_temp_c)::int     AS battery_temp_c,
+                avg(controller_temp_c)::int  AS controller_temp_c,
+                mode() WITHIN GROUP (ORDER BY charge_state) AS charge_state
             FROM telemetry
             WHERE ts > now() - (%s || ' hours')::interval
             GROUP BY bucket
@@ -155,6 +159,7 @@ def api_timeseries():
         for r in rows:
             r["bucket"] = r["bucket"].isoformat()
             r["battery_v"] = _float(r["battery_v"])
+            r["charge_i"]  = _float(r["charge_i"])
         return jsonify(rows)
 
 
