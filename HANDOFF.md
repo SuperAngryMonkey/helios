@@ -1,6 +1,6 @@
 # helios — handoff
 
-Current state as of 2026-06-05 (v0.2.0).
+Current state as of 2026-06-19 (v0.2.1).
 
 ## What's working
 
@@ -10,24 +10,35 @@ Current state as of 2026-06-05 (v0.2.0).
 - **Authentication** (v0.2.0): Flask-Login session auth, single admin user,
   bcrypt hash in `/etc/helios/admin.env`. All routes (HTML + JSON API)
   require login. Login page at `/login`, logout at `/logout`.
-- **Admin page** (v0.2.0): `/admin` form for editing controller IP, port,
-  device ID, and poll cadences. Saves atomically rewrite
-  `/etc/helios/controller.env` and restart the daemon via a narrow sudoers
-  grant.
+- **Admin page** (v0.2.0, refactored v0.2.1): `/admin` form for editing
+  controller IP, port, device ID, and poll cadences. Save writes
+  `/etc/helios/controller.env` (mode 660, root:helios) directly; a
+  `helios-config.path` systemd unit watches the file with inotify and
+  triggers `helios-restart.service` → daemon restart within ~1 s.
+  No sudo, no privilege escalation, works on unprivileged LXCs.
+- **StarTech NETRS2321P** (v0.2.1): second serial gateway on the lab
+  at 10.200.200.10:4001. Selectable via the /admin form on the fly.
 - **Postgres** local on the LXC, schema applied, indices on `(ts DESC)`.
-- **Gateway**: EarthCam EC-SS501 ("TerminalSrv v3.600MU" firmware) at
-  10.200.200.201:4660 in TCP-server mode. Slave 255 (Renogy broadcast).
+- **Gateway (current)**: pick whichever is powered up —
+  - **EarthCam EC-SS501** ("TerminalSrv v3.600MU") at
+    `10.200.200.201:4660`, TCP-server mode, silent time 50 ms.
+  - **StarTech NETRS2321P** at `10.200.200.10:4001`, TCP-server mode
+    on the "TCP Mode" page (not the Telnet page), silent time 200 ms.
+  Both use slave 255 (Renogy broadcast).
 - **Tailscale**: enrolled as `helios.bobcat-gondola.ts.net` (100.127.229.72).
 
 ## Lab deployment
 
 - **Proxmox host**: proxlab (10.0.1.9 / TS 100.105.71.57)
-- **LXC**: helios — 10.0.1.149 / TS 100.127.229.72
+- **LXC**: helios — 10.0.1.155 (DHCP, no reservation) / TS 100.127.229.72
 - **Subnets in scope**: 10.0.1.0/24 (lab), 10.200.200.0/24 (controller VLAN)
 - **Resources**: 1 vCPU / 1 GB RAM / 8 GB disk, Debian 12
 
 ## Open items
 
+- [ ] **Static DHCP reservation**: helios LAN IP has drifted 10.0.1.149 →
+      10.0.1.155 on lease renewal. Pin a reservation on the FortiGate so
+      docs and any hardcoded LAN references stop rotting.
 - [ ] **Tailscale tag**: the helios LXC is untagged. Other lab boxes
       (agora, apc-dev, etc.) are `tag:tagged-devices`. Run
       `tailscale up --advertise-tags=tag:tagged-devices --reset` and

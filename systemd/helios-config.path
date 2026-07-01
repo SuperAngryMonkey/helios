@@ -1,0 +1,10 @@
+[Unit]
+Description=Watch /etc/helios/controller.env for changes
+Documentation=https://github.com/SuperAngryMonkey/helios
+
+[Path]
+PathModified=/etc/helios/controller.env
+Unit=helios-restart.service
+
+[Install]
+WantedBy=multi-user.target

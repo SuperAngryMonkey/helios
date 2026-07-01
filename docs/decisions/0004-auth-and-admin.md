@@ -87,3 +87,47 @@ schema clean and lets credentials live in env files (the existing pattern).
 - Daemon restart on save means a ~3–5 second blackout where the
   dashboard shows stale data and the daemon misses one poll cycle.
   Acceptable for a tool that polls every 30 s.
+
+## Revised 2026-06-19
+
+The original sudoers approach was implemented in v0.2.0 and works on
+privileged containers, but **fails on unprivileged LXCs** (like ours),
+where the kernel enforces `NoNewPrivs` at the container boundary.
+`sudo` cannot escalate no matter what the systemd unit says, and
+enabling `nesting=1` on the LXC does not help — nesting addresses
+Docker-in-LXC scenarios, not sudo escalation.
+
+The architecture was refactored in v0.2.1 to eliminate the sudo
+dependency entirely:
+
+1. `/etc/helios/controller.env` is now mode **660 root:helios**. The
+   helios user (which runs both the daemon and the web app) can write
+   directly.
+2. A new **`helios-config.path`** systemd unit uses inotify
+   (`PathModified=`) to watch the file. On any modification it
+   triggers `helios-restart.service`, a one-shot unit that runs
+   `systemctl restart helios.service`.
+3. The web app's Save handler now just writes the file. The path unit
+   picks up the change and restarts the daemon within ~1 second.
+
+### Why this is better
+
+- **No privilege escalation on demand.** helios-web runs with
+  `NoNewPrivileges=true` restored.
+- **No sudoers file to maintain or misconfigure.**
+- **No `/var/lib/helios/` staging directory.**
+- **No `ProtectSystem=strict` exemption drama** — the ReadWritePaths
+  entry is now a single file (`/etc/helios/controller.env`), not a
+  whole directory.
+- **Portable across container types.** Works identically on privileged
+  and unprivileged LXCs, VMs, bare metal.
+- **Audit trail preserved** via journald: both the path unit and the
+  restart service log through the systemd journal
+  (`journalctl -u helios-config.path -u helios-restart`).
+
+### Removed
+
+- `helios.sudoers` (from repo and `/etc/sudoers.d/helios`)
+- `/var/lib/helios/` staging directory
+- `subprocess` sudo invocations in `web/app.py`
+- `/var/lib/helios` from `ReadWritePaths` in `helios-web.service`

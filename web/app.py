@@ -1,12 +1,11 @@
 """
 helios.web — Monkey-themed dashboard for the Renogy Wanderer telemetry.
 Reads from the same Postgres tables the helios daemon writes to.
-Auth via Flask-Login. Admin page can edit controller.env and restart the
-daemon via a narrow sudoers grant.
+Auth via Flask-Login. Admin page writes controller.env directly; a
+systemd path unit watches the file and restarts the daemon on change.
 """
 import os
 import re
-import subprocess
 from pathlib import Path
 
 import bcrypt
@@ -32,7 +31,6 @@ CTRL  = load_env("/etc/helios/controller.env")
 ADMIN = load_env("/etc/helios/admin.env")
 
 CONTROLLER_ENV_PATH = "/etc/helios/controller.env"
-STAGING_PATH        = "/var/lib/helios/controller.env.new"
 
 CHARGE_STATES = {
     0: "deactivated", 1: "activated", 2: "mppt", 3: "equalizing",
@@ -235,26 +233,17 @@ def _rewrite_env(values):
     return "\n".join(out) + "\n"
 
 
-def _save_and_restart(values):
+def _save_config(values):
+    """
+    Write controller.env directly. The helios-config.path systemd unit
+    watches this file with inotify and triggers helios-restart.service
+    on any modification, which restarts the daemon within ~1s.
+
+    Requires controller.env to be group-writable by 'helios' (mode 660,
+    root:helios). No sudo, no privilege escalation.
+    """
     content = _rewrite_env(values)
-    # Write to staging (helios-owned)
-    Path(STAGING_PATH).write_text(content)
-    os.chmod(STAGING_PATH, 0o600)
-    # Atomic install via sudo (narrow grant)
-    r = subprocess.run(
-        ["sudo", "/usr/bin/install", "-m", "640", "-o", "root", "-g", "helios",
-         STAGING_PATH, CONTROLLER_ENV_PATH],
-        capture_output=True, text=True, timeout=10,
-    )
-    if r.returncode != 0:
-        raise RuntimeError(f"install failed: {r.stderr.strip() or r.stdout.strip()}")
-    # Restart daemon
-    r = subprocess.run(
-        ["sudo", "/bin/systemctl", "restart", "helios"],
-        capture_output=True, text=True, timeout=15,
-    )
-    if r.returncode != 0:
-        raise RuntimeError(f"restart failed: {r.stderr.strip() or r.stdout.strip()}")
+    Path(CONTROLLER_ENV_PATH).write_text(content)
 
 
 @app.route("/admin", methods=["GET", "POST"])
@@ -275,8 +264,8 @@ def admin():
                     break
                 new_values[key] = val
             if not error:
-                _save_and_restart(new_values)
-                success = "Saved. Daemon restarted with new settings."
+                _save_config(new_values)
+                success = "Saved. Daemon will restart within a second."
                 # Refresh in-process CTRL too
                 global CTRL
                 CTRL = load_env(CONTROLLER_ENV_PATH)

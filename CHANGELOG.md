@@ -7,6 +7,57 @@ Versioning: [SemVer](https://semver.org/spec/v2.0.0.html)
 
 ## [Unreleased]
 
+## [0.2.1] — 2026-06-19
+
+### Changed — admin save architecture (breaking for anyone on 0.2.0)
+
+The v0.2.0 sudoers-based admin save doesn't work on unprivileged LXCs
+(Proxmox default) because the kernel enforces `NoNewPrivs` at the
+container boundary. Enabling `nesting=1` doesn't help — that's for
+Docker-in-LXC, not sudo escalation.
+
+Refactored to an **inotify path-unit** architecture that eliminates
+privilege escalation entirely:
+
+- `web/app.py` writes `/etc/helios/controller.env` directly. No sudo,
+  no staging path.
+- New **`helios-config.path`** unit watches the file (`PathModified=`).
+- New **`helios-restart.service`** unit — triggered by the path unit,
+  runs `systemctl restart helios.service`.
+- `helios-web.service` restores `NoNewPrivileges=true` and narrows
+  `ReadWritePaths` to the single file it needs to write.
+
+### Migration from v0.2.0
+
+```bash
+# on the helios LXC
+chmod 660 /etc/helios/controller.env
+rm -f /etc/sudoers.d/helios
+rm -rf /var/lib/helios
+
+# after scp'ing new files
+systemctl daemon-reload
+systemctl enable --now helios-config.path
+systemctl restart helios-web
+```
+
+### Removed
+
+- `helios.sudoers` — no longer needed.
+- `/var/lib/helios/` staging directory — no longer needed.
+- All `subprocess`/`sudo` invocations from `web/app.py`.
+
+### Fixed
+
+- Admin form Save now succeeds on unprivileged Proxmox LXCs.
+
+### Docs
+
+- ADR-0004 gains a "Revised 2026-06-19" section documenting the
+  refactor and its rationale.
+- HANDOFF LAN IP bumped after DHCP renewal (10.0.1.149 → 10.0.1.155);
+  static reservation flagged as open item.
+
 ## [0.2.0] — 2026-06-05
 
 ### Added

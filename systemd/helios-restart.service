@@ -1,0 +1,8 @@
+[Unit]
+Description=Restart helios daemon after controller.env change
+Documentation=https://github.com/SuperAngryMonkey/helios
+After=helios.service
+
+[Service]
+Type=oneshot
+ExecStart=/bin/systemctl restart helios.service

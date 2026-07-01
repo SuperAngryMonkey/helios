@@ -17,11 +17,15 @@ StandardOutput=journal
 StandardError=journal
 SyslogIdentifier=helios-web
 
+# Hardening — no privilege escalation is possible or needed.
+# The admin form writes /etc/helios/controller.env directly (mode 660,
+# root:helios). The helios-config.path unit watches for changes and
+# triggers helios-restart.service, which does the actual daemon restart.
 NoNewPrivileges=true
 PrivateTmp=true
 ProtectSystem=strict
 ProtectHome=true
-ReadWritePaths=/opt/helios
+ReadWritePaths=/opt/helios /etc/helios/controller.env
 PrivateDevices=true
 ProtectKernelTunables=true
 ProtectKernelModules=true
